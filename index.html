@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111827">
+<title>Apna Social</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--ink:#182033;--muted:#687386;--line:#e5e9f1;--accent:#5557d9;--soft:#eeeeff;--red:#b83232}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px system-ui,-apple-system,Segoe UI,sans-serif}
+button,input,textarea,select{font:inherit}button{border:0;border-radius:11px;padding:10px 14px;background:var(--accent);color:#fff;font-weight:650;cursor:pointer}button.secondary{background:var(--soft);color:#3435a6}button.danger{background:#fff0ef;color:var(--red)}button:disabled{opacity:.5}
+input,textarea,select{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);margin:5px 0}textarea{min-height:80px;resize:vertical}
+header{position:sticky;top:0;z-index:5;background:#111827;color:white;padding:13px 16px;display:flex;align-items:center;justify-content:space-between}
+header strong{font-size:19px}.wrap{max-width:720px;margin:18px auto;padding:0 12px 100px}.panel,.post,.person,.story{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:15px;margin:11px 0;box-shadow:0 3px 14px #15203a08}
+.hidden{display:none!important}.muted,small{color:var(--muted)}h2{font-size:21px;margin:0 0 12px}h3{margin:0 0 9px}.row{display:flex;gap:8px;align-items:center}.row>*{flex:1;min-width:0}.tabs{position:fixed;bottom:0;left:0;right:0;z-index:8;display:flex;justify-content:space-around;background:#fff;border-top:1px solid var(--line);padding:7px 3px calc(7px + env(safe-area-inset-bottom))}
+.tabs button{background:transparent;color:#414b60;padding:8px 5px;font-size:12px;min-width:0}.tabs button.active{background:var(--soft);color:var(--accent)}
+.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.actions button{font-size:12px;padding:8px 10px}.posthead{display:flex;justify-content:space-between;gap:8px;align-items:center}.postcontent{white-space:pre-wrap;overflow-wrap:anywhere}.media{width:100%;max-height:440px;object-fit:contain;border-radius:12px;margin-top:10px;background:#f1f2f5}.pill{display:inline-block;border-radius:99px;background:var(--soft);color:#3435a6;padding:4px 9px;font-size:12px}
+hr{border:0;border-top:1px solid var(--line);margin:12px 0}.storyrow{display:flex;gap:10px;overflow:auto;padding:5px 0}.story{min-width:92px;text-align:center;margin:0;padding:10px}.avatar{width:45px;height:45px;border-radius:50%;background:#e9eaff;display:grid;place-items:center;margin:0 auto 5px;font-weight:700;color:#4142a8}
+@media(min-width:700px){.wrap{margin-top:25px}}
+</style>
+</head>
+<body>
+<header><strong>✦ Apna Social</strong><span id="headerUser" class="muted"></span></header>
+<main class="wrap">
+<section id="authView" class="panel">
+<h2 id="authTitle">Create your account</h2>
+<div id="signupFields"><input id="fullName" placeholder="Full name"><input id="username" placeholder="Username (3–24 letters/numbers/_)"></div>
+<input id="email" type="email" placeholder="Email address" autocomplete="email">
+<input id="password" type="password" placeholder="Password (minimum 8 characters)" autocomplete="current-password">
+<button id="authButton" style="width:100%">Sign up</button>
+<div class="row" style="margin-top:8px"><button id="switchAuth" class="secondary">Already registered? Login</button><button id="forgot" class="secondary">Forgot password</button></div>
+<p id="authMessage" class="muted"></p>
+</section>
+<section id="appView" class="hidden">
+<section id="homePage">
+<div class="panel"><h2>Stories</h2><div class="row"><input id="storyFile" type="file" accept="image/*,video/*"><button id="addStory">Add story</button></div><div id="stories" class="storyrow"></div></div>
+<div class="panel"><h2>Following feed</h2><textarea id="postText" maxlength="2000" placeholder="What's happening?"></textarea><input id="postFile" type="file" accept="image/*,video/*"><button id="publish">Post</button></div><div id="feed"></div>
+</section>
+<section id="explorePage" class="hidden"><div class="panel"><h2>Explore people</h2><input id="searchInput" placeholder="Search name or username"><div id="searchResults"></div></div><div class="panel"><h2>Explore posts</h2><div id="exploreFeed"></div></div></section>
+<section id="messagesPage" class="hidden"><div class="panel"><h2>Messages</h2><input id="dmSearch" placeholder="Enter username to start a chat"><button id="startChat">Find user</button><div id="dmPeople"></div><hr><div id="chatTitle" class="muted">Select a conversation</div><div id="chatMessages"></div><div class="row"><input id="messageText" placeholder="Write a message"><button id="sendMessage">Send</button></div></div></section>
+<section id="activityPage" class="hidden"><div class="panel"><h2>Activity</h2><div id="notifications"></div></div></section>
+<section id="profilePage" class="hidden"><div id="myProfile" class="panel"></div><div class="panel"><h3>Edit profile</h3><input id="editName" placeholder="Full name"><input id="editGotra" placeholder="Gotra (optional)"><input id="editBio" placeholder="Bio"><label><input id="privateAccount" type="checkbox" style="width:auto"> Private account</label><button id="saveProfile">Save profile</button></div><div id="myPosts"></div></section>
+<section id="staffPage" class="hidden"><div class="panel"><h2>Staff dashboard</h2><div id="staffInfo"></div><h3>Reports</h3><div id="reports"></div><hr><h3>Staff management (Primary Super Admin)</h3><input id="staffUsername" placeholder="Username to assign staff role"><select id="staffRole"><option value="moderator">Moderator</option><option value="secondary_super_admin">Secondary Super Admin</option><option value="customer">Remove staff role</option></select><button id="assignStaff">Apply role</button></div></section>
+</section>
+</main>
+<nav id="tabs" class="tabs hidden">
+<button data-page="homePage" class="active">⌂<br>Home</button><button data-page="explorePage">⌕<br>Explore</button><button data-page="messagesPage">✉<br>DMs</button><button data-page="activityPage">♡<br>Activity</button><button data-page="profilePage">◉<br>Profile</button><button data-page="staffPage" id="staffTab" class="hidden">♛<br>Staff</button><button id="logout">↪<br>Logout</button>
+</nav>
+<script src="./app.js"></script>
+</body></html>
